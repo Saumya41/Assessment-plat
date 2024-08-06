@@ -4,6 +4,7 @@ from beanie import init_beanie
 from models.admin import Admin
 from models.student import Student
 from models.question import Question
+from models.answer import UniversalAnswer, StudentAnswer
 
 admin_collection = Admin
 student_collection = Student
@@ -84,3 +85,27 @@ async def update_question_data(id: PydanticObjectId, data: dict) -> Union[bool, 
 
 
 
+async def create_quiz(question_ids: List[PydanticObjectId]) -> List[Question]:
+    # Retrieve questions based on the provided IDs
+    questions = await Question.find(Question.id.in_(question_ids)).to_list()
+    return questions
+
+
+
+
+# Universal Answer
+async def add_universal_answer(answer: UniversalAnswer) -> UniversalAnswer:
+    return await answer.create()
+
+
+async def retrieve_universal_answer(question_id: PydanticObjectId) -> UniversalAnswer:
+    return await UniversalAnswer.find_one(UniversalAnswer.question_id == question_id)
+
+
+# Student Answer
+async def add_student_answer(answer: StudentAnswer) -> StudentAnswer:
+    return await answer.create()
+
+
+async def retrieve_student_answers(quiz_id: PydanticObjectId, user_id: PydanticObjectId) -> List[StudentAnswer]:
+    return await StudentAnswer.find(StudentAnswer.quiz_id == quiz_id, StudentAnswer.user_id == user_id).to_list()
