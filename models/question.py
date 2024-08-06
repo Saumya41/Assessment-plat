@@ -6,7 +6,7 @@ from pydantic import BaseModel
 class Question(Document):
     question_text: str
     options: List[str]
-    correct_answer: str
+    
 
     
 
@@ -15,7 +15,7 @@ class Question(Document):
             "example": {
                 "question_text": "What is the capital of France?",
                 "options": ["Paris", "London", "Berlin", "Madrid"],
-                "correct_answer": "Paris",
+                
             }
         }
     class Settings:

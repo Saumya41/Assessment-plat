@@ -4,7 +4,7 @@ from typing import List, Optional, Any
 class UpdateQuestionModel(BaseModel):
     question_text: Optional[str]
     options: List[str]
-    correct_answer: Optional[str]
+    
 
     class Collection:
         name = "question"
@@ -14,7 +14,7 @@ class UpdateQuestionModel(BaseModel):
             "example": {
                 "question_text": "What is the capital of France?",
                 "options": ["Paris", "London", "Berlin", "Madrid"],
-                "correct_answer": "Paris",
+                
             }
         }
 
