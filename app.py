@@ -22,7 +22,7 @@ async def read_root():
 
 
 app.include_router(AdminRouter, tags=["Administrator"], prefix="/admin")
-app.include_router(QuestionRouter, prefix="/quiz", tags=["quiz"],dependencies=[Depends(token_listener)],)
+app.include_router(QuestionRouter, prefix="/Question", tags=["Question"],dependencies=[Depends(token_listener)],)
 app.include_router(StudentRouter,tags=["Students"],prefix="/student",dependencies=[Depends(token_listener)],)
 app.include_router(Answerrouter, prefix="/answers", tags=["answers"])
 app.include_router(Quizrouter, prefix="/quizzes", tags=["Quizzes"])
