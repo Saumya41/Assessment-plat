@@ -5,6 +5,7 @@ from models.admin import Admin
 from models.student import Student
 from models.question import Question
 from models.answer import UniversalAnswer, StudentAnswer
+from models.quiz import Quiz
 
 admin_collection = Admin
 student_collection = Student
@@ -85,10 +86,16 @@ async def update_question_data(id: PydanticObjectId, data: dict) -> Union[bool, 
 
 
 
-async def create_quiz(question_ids: List[PydanticObjectId]) -> List[Question]:
-    # Retrieve questions based on the provided IDs
-    questions = await Question.find(Question.id.in_(question_ids)).to_list()
+
+async def retrieve_questions_by_ids(question_ids: List[PydanticObjectId]) -> List[Question]:
+    questions = await Question.find({"_id": {"$in": question_ids}}).to_list()
     return questions
+
+
+async def create_quiz(question_ids: List[PydanticObjectId], title: str = None) -> Quiz:
+    quiz = Quiz(title=title, questions=question_ids)
+    await quiz.insert()
+    return quiz
 
 
 
