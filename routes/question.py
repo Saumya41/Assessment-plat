@@ -81,14 +81,3 @@ async def update_question(id: PydanticObjectId, req: UpdateQuestionModel = Body(
         "data": False,
     }
 
-@router.post("/create_quiz", response_description="Create a quiz from selected questions")
-async def create_quiz_endpoint(question_ids: List[PydanticObjectId] = Body(...)):
-    questions = await create_quiz(question_ids)
-    if not questions:
-        raise HTTPException(status_code=404, detail="Questions not found")
-    return {
-        "status_code": 200,
-        "response_type": "success",
-        "description": "Quiz created successfully",
-        "data": questions,
-    }

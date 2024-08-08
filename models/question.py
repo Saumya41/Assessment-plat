@@ -1,15 +1,12 @@
 from typing import Optional, Any, List
-
-from beanie import Document
+from beanie import Document, PydanticObjectId
 from pydantic import BaseModel
+from bson import ObjectId
 
 class Question(Document):
     question_text: str
     options: List[str]
     
-
-    
-
     class Config:
         json_schema_extra = {
             "example": {

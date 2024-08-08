@@ -5,6 +5,7 @@ from routes.admin import router as AdminRouter
 from routes.student import router as StudentRouter
 from routes.question import router as QuestionRouter
 from routes.answer import router as Answerrouter
+from routes.quiz import router as Quizrouter
 
 app = FastAPI()
 
@@ -17,10 +18,11 @@ async def start_database():
 
 @app.get("/", tags=["Root"])
 async def read_root():
-    return {"message": "Welcome to Assessment P latform."}
+    return {"message": "Welcome to Assessment Platform."}
 
 
 app.include_router(AdminRouter, tags=["Administrator"], prefix="/admin")
 app.include_router(QuestionRouter, prefix="/quiz", tags=["quiz"],dependencies=[Depends(token_listener)],)
 app.include_router(StudentRouter,tags=["Students"],prefix="/student",dependencies=[Depends(token_listener)],)
 app.include_router(Answerrouter, prefix="/answers", tags=["answers"])
+app.include_router(Quizrouter, prefix="/quizzes", tags=["Quizzes"])
