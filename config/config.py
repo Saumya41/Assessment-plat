@@ -4,9 +4,6 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic_settings import BaseSettings
 from models import Admin, Student, Question, UniversalAnswer, StudentAnswer, Quiz
 
-
-
-
 class Settings(BaseSettings):
     # database configurations
     DATABASE_URL: Optional[str] = None

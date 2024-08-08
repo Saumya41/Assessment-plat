@@ -3,7 +3,10 @@ from beanie import PydanticObjectId
 
 from models.answer import UniversalAnswer, StudentAnswer
 from schemas.answer import UniversalAnswerSchema, StudentAnswerSchema
-from database.database import add_universal_answer, add_student_answer, retrieve_universal_answer, retrieve_student_answers
+from database.database import add_universal_answer, add_student_answer, retrieve_universal_answer, retrieve_student_answers, calculate_score
+from fastapi import APIRouter, HTTPException, Depends
+from schemas.score import ScoreResponse  # Create a schema for the score response
+
 
 router = APIRouter()
 
@@ -58,3 +61,18 @@ async def get_student_answers(quiz_id: PydanticObjectId, user_id: PydanticObject
         "description": "Student answers retrieved successfully",
         "data": answers,
     }
+
+
+
+@router.get("/quiz/{quiz_id}/student/{student_id}/score", response_model=ScoreResponse)
+async def get_student_score(quiz_id: PydanticObjectId, student_id: PydanticObjectId):
+    try:
+        score = await calculate_score(quiz_id, student_id)
+        return {
+            "status_code": 200,
+            "response_type": "success",
+            "description": "Score calculated successfully",
+            "score": score
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))

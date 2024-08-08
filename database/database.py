@@ -1,11 +1,12 @@
-from typing import List, Union
+from typing import List, Union, Dict
 from beanie import PydanticObjectId
-from beanie import init_beanie
 from models.admin import Admin
 from models.student import Student
 from models.question import Question
 from models.answer import UniversalAnswer, StudentAnswer
 from models.quiz import Quiz
+from models.quiz import Quiz  # Assuming you have a Quiz model
+from models.answer import StudentAnswer, UniversalAnswer
 
 admin_collection = Admin
 student_collection = Student
@@ -85,8 +86,6 @@ async def update_question_data(id: PydanticObjectId, data: dict) -> Union[bool, 
     return False
 
 
-
-
 async def retrieve_questions_by_ids(question_ids: List[PydanticObjectId]) -> List[Question]:
     questions = await Question.find({"_id": {"$in": question_ids}}).to_list()
     return questions
@@ -96,9 +95,6 @@ async def create_quiz(question_ids: List[PydanticObjectId], title: str = None) -
     quiz = Quiz(title=title, questions=question_ids)
     await quiz.insert()
     return quiz
-
-
-
 
 # Universal Answer
 async def add_universal_answer(answer: UniversalAnswer) -> UniversalAnswer:
@@ -116,3 +112,31 @@ async def add_student_answer(answer: StudentAnswer) -> StudentAnswer:
 
 async def retrieve_student_answers(quiz_id: PydanticObjectId, user_id: PydanticObjectId) -> List[StudentAnswer]:
     return await StudentAnswer.find(StudentAnswer.quiz_id == quiz_id, StudentAnswer.user_id == user_id).to_list()
+
+
+async def calculate_score(quiz_id: PydanticObjectId, student_id: PydanticObjectId) -> int:
+    # Retrieve the student's answers for the given quiz
+    student_answers: List[StudentAnswer] = await retrieve_student_answers(quiz_id, student_id)
+    
+    # Initialize the score
+    score = 0
+    
+    # Iterate over the student's answers
+    for student_answer in student_answers:
+        question_id = student_answer.question_id
+        
+        # Retrieve the correct (universal) answer for this question
+        correct_answer_doc = await retrieve_universal_answer(question_id)
+        
+        if correct_answer_doc is None:
+            # Handle the case where no correct answer is found
+            print(f"No correct answer found for question ID {question_id}")
+            continue  # Skip this question and move to the next
+        
+        correct_answer = correct_answer_doc.correct_answer  # Ensure this matches your model's field name
+        
+        # Normalize both strings: strip whitespace and convert to lowercase
+        if correct_answer.strip().lower() == student_answer.student_answer.strip().lower():
+            score += 1
+
+    return score
