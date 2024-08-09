@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Body, HTTPException
 from beanie import PydanticObjectId
-
+from auth.jwt_bearer import JWTBearer
 from models.answer import UniversalAnswer, StudentAnswer
 from schemas.answer import UniversalAnswerSchema, StudentAnswerSchema
 from database.database import add_universal_answer, add_student_answer, retrieve_universal_answer, retrieve_student_answers, calculate_score, retrieve_student_score
@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 # Universal Answer Route
-@router.post("/universal_answer", response_description="Add the correct answer to a question")
+@router.post("/universal_answer", response_description="Add the correct answer to a question", dependencies=[Depends(JWTBearer())])
 async def add_universal_answer_data(answer_data: UniversalAnswerSchema = Body(...)):
     universal_answer = UniversalAnswer(**answer_data.dict())
     new_answer = await add_universal_answer(universal_answer)

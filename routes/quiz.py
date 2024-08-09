@@ -1,14 +1,16 @@
-from fastapi import APIRouter, Body, HTTPException, Query
+from fastapi import APIRouter, Body, HTTPException, Query, Depends
 from typing import List
 from beanie import PydanticObjectId
-from database.database import retrieve_questions_by_ids, create_quiz, retrieve_student, retrieve_quiz_by_id
-from schemas.quiz import Response, QuizCreate
+from database.database import retrieve_questions_by_ids, create_quiz, retrieve_student, retrieve_quiz_by_id, add_student_answer
+from schemas.quiz import Response
 from utils.email import send_assessment_email
-from models.quiz import Quiz
 from utils.utils import generate_assessment_link
+from models.answer import StudentAnswer
+from schemas.answer import StudentAnswerSchema
+from auth.jwt_bearer import JWTBearer
 router = APIRouter()
 
-@router.post("/create_quiz", response_description="Create a quiz from selected questions", response_model=Response)
+@router.post("/create_quiz", response_description="Create a quiz from selected questions", response_model=Response, dependencies=[Depends(JWTBearer())])
 async def create_quiz_endpoint(question_ids: List[PydanticObjectId] = Body(...), title: str = Body(None)):
     questions = await retrieve_questions_by_ids(question_ids)
     if not questions:
@@ -35,7 +37,7 @@ async def get_quiz(quiz_id: PydanticObjectId):
     else:
         raise HTTPException(status_code=404, detail=f"Quiz with ID {quiz_id} not found")
 
-@router.post("/send-assessment-link/{student_id}/{quiz_id}")
+@router.post("/send-assessment-link/{student_id}/{quiz_id}", dependencies=[Depends(JWTBearer())])
 async def send_assessment_link(student_id: str, quiz_id: str):
     student = await retrieve_student(student_id)  # Fetch student from the database
     if not student:
@@ -65,4 +67,15 @@ async def get_assessment(student_id: str = Query(...), quiz_id: str = Query(...)
         "quiz_id": quiz_id,
         "message": "Assessment data retrieved successfully",
         "quiz": quiz,
+    }
+
+@router.post("/student_answer", response_description="Record student's answer")
+async def add_student_answer_data(answer_data: StudentAnswerSchema = Body(...)):
+    student_answer = StudentAnswer(**answer_data.dict())
+    new_answer = await add_student_answer(student_answer)
+    return {
+        "status_code": 200,
+        "response_type": "success",
+        "description": "Student answer recorded successfully",
+        "data": new_answer,
     }
