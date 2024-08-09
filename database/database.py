@@ -4,8 +4,7 @@ from models.admin import Admin
 from models.student import Student
 from models.question import Question
 from models.answer import UniversalAnswer, StudentAnswer
-from models.quiz import Quiz
-from models.quiz import Quiz  # Assuming you have a Quiz model
+from models.quiz import Quiz, StudentScore
 from models.answer import StudentAnswer, UniversalAnswer
 
 admin_collection = Admin
@@ -126,17 +125,34 @@ async def calculate_score(quiz_id: PydanticObjectId, student_id: PydanticObjectI
         question_id = student_answer.question_id
         
         # Retrieve the correct (universal) answer for this question
-        correct_answer_doc = await retrieve_universal_answer(question_id)
+        correct_answer_doc: UniversalAnswer = await retrieve_universal_answer(question_id)
         
         if correct_answer_doc is None:
-            # Handle the case where no correct answer is found
-            print(f"No correct answer found for question ID {question_id}")
+            # If no correct answer is found, log this case or handle it accordingly
             continue  # Skip this question and move to the next
         
-        correct_answer = correct_answer_doc.correct_answer  # Ensure this matches your model's field name
+        correct_answer = correct_answer_doc.correct_answer
         
-        # Normalize both strings: strip whitespace and convert to lowercase
+        # Normalize both strings: strip whitespace and convert to lowercase for comparison
         if correct_answer.strip().lower() == student_answer.student_answer.strip().lower():
             score += 1
 
+    # Save the score in the database
+    await save_student_score(quiz_id, student_id, score)
+
     return score
+
+async def save_student_score(quiz_id: PydanticObjectId, student_id: PydanticObjectId, score: int) -> None:
+    # Create a new StudentScore document
+    student_score = StudentScore(
+        quiz_id=quiz_id,
+        student_id=student_id,
+        score=score
+    )
+    
+    # Save the document to the database
+    await student_score.insert()
+
+async def retrieve_student_score(quiz_id: PydanticObjectId, student_id: PydanticObjectId) -> StudentScore:
+    student_score = await StudentScore.find_one({"quiz_id": quiz_id, "student_id": student_id})
+    return student_score

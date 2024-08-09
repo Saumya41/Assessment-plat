@@ -3,7 +3,7 @@ from beanie import PydanticObjectId
 
 from models.answer import UniversalAnswer, StudentAnswer
 from schemas.answer import UniversalAnswerSchema, StudentAnswerSchema
-from database.database import add_universal_answer, add_student_answer, retrieve_universal_answer, retrieve_student_answers, calculate_score
+from database.database import add_universal_answer, add_student_answer, retrieve_universal_answer, retrieve_student_answers, calculate_score, retrieve_student_score
 from fastapi import APIRouter, HTTPException, Depends
 from schemas.score import ScoreResponse  # Create a schema for the score response
 
@@ -65,7 +65,7 @@ async def get_student_answers(quiz_id: PydanticObjectId, user_id: PydanticObject
 
 
 @router.get("/quiz/{quiz_id}/student/{student_id}/score", response_model=ScoreResponse)
-async def get_student_score(quiz_id: PydanticObjectId, student_id: PydanticObjectId):
+async def calculate_student_score(quiz_id: PydanticObjectId, student_id: PydanticObjectId):
     try:
         score = await calculate_score(quiz_id, student_id)
         return {
@@ -76,3 +76,17 @@ async def get_student_score(quiz_id: PydanticObjectId, student_id: PydanticObjec
         }
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.get("/student_score/{quiz_id}/{student_id}", response_description="Get student's score for a quiz")
+async def get_student_score(quiz_id: PydanticObjectId, student_id: PydanticObjectId):
+    student_score = await retrieve_student_score(quiz_id, student_id)
+    if not student_score:
+        raise HTTPException(status_code=404, detail="Score not found for the given quiz and student")
+    
+    return {
+        "status_code": 200,
+        "response_type": "success",
+        "description": "Student score retrieved successfully",
+        "data": student_score,
+    }
