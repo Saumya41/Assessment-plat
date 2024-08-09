@@ -1,8 +1,6 @@
 import time
 from typing import Dict
-
 import jwt
-
 from config.config import Settings
 
 

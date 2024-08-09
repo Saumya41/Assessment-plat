@@ -1,5 +1,7 @@
 from typing import Optional, List
 from beanie import Document, PydanticObjectId
+from pydantic import BaseModel
+
 
 class Quiz(Document):
     title: Optional[str] = None
@@ -15,3 +17,23 @@ class Quiz(Document):
 
     class Settings:
         name = "quiz"
+
+
+
+class StudentScore(Document):
+    quiz_id: PydanticObjectId  # The ID of the quiz
+    student_id: PydanticObjectId  # The ID of the student
+    score: int  # The score the student achieved
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "quiz_id": "64df9f8e5b36a9d7ac8b4567",
+                "student_id": "64df9f8e5b36a9d7ac8b4568",
+                "score": 90,
+            }
+        }
+    
+    class Settings:
+        name = "student_scores"  # Collection name in MongoDB
+

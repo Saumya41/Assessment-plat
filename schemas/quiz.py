@@ -27,3 +27,11 @@ class Response(BaseModel):
                 "data": "Sample data",
             }
         }
+
+class StudentScore(BaseModel):
+    quiz_id: str
+    student_id: str
+    score: int
+
+    class Config:
+        orm_mode = True
