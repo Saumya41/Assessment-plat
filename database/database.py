@@ -141,6 +141,9 @@ async def calculate_score(quiz_id: PydanticObjectId, student_id: PydanticObjectI
     await save_student_score(quiz_id, student_id, score)
 
     return score
+async def retrieve_quiz_by_id(quiz_id: PydanticObjectId) -> Quiz:
+    quiz = await Quiz.get(quiz_id)
+    return quiz
 
 async def save_student_score(quiz_id: PydanticObjectId, student_id: PydanticObjectId, score: int) -> None:
     # Create a new StudentScore document
