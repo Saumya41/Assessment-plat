@@ -141,9 +141,16 @@ async def calculate_score(quiz_id: PydanticObjectId, student_id: PydanticObjectI
     await save_student_score(quiz_id, student_id, score)
 
     return score
-async def retrieve_quiz_by_id(quiz_id: PydanticObjectId) -> Quiz:
+async def retrieve_quiz_by_id(quiz_id: PydanticObjectId):
     quiz = await Quiz.get(quiz_id)
-    return quiz
+    if quiz:
+        # Retrieve all questions associated with this quiz
+        questions = await retrieve_questions_by_ids(quiz.questions)
+        # Embed the actual questions in the quiz object
+        quiz_data = quiz.dict()
+        quiz_data["questions"] = questions
+        return quiz_data
+    return None
 
 async def save_student_score(quiz_id: PydanticObjectId, student_id: PydanticObjectId, score: int) -> None:
     # Create a new StudentScore document
@@ -159,3 +166,8 @@ async def save_student_score(quiz_id: PydanticObjectId, student_id: PydanticObje
 async def retrieve_student_score(quiz_id: PydanticObjectId, student_id: PydanticObjectId) -> StudentScore:
     student_score = await StudentScore.find_one({"quiz_id": quiz_id, "student_id": student_id})
     return student_score
+
+
+async def retrieve_questions_by_ids(question_ids: List[PydanticObjectId]):
+    questions = await Question.find({"_id": {"$in": question_ids}}).to_list()
+    return questions

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Body, HTTPException, Query, Depends
 from typing import List
 from beanie import PydanticObjectId
-from database.database import retrieve_questions_by_ids, create_quiz, retrieve_student, retrieve_quiz_by_id, add_student_answer
+from database.database import retrieve_questions_by_ids, create_quiz, retrieve_student, retrieve_quiz_by_id
 from schemas.quiz import Response
 from utils.email import send_assessment_email
 from utils.utils import generate_assessment_link
@@ -32,7 +32,7 @@ async def get_quiz(quiz_id: PydanticObjectId):
             "status_code": 200,
             "response_type": "success",
             "description": "Quiz retrieved successfully",
-            "data": quiz,
+            "data": quiz,  # This will include the full questions now
         }
     else:
         raise HTTPException(status_code=404, detail=f"Quiz with ID {quiz_id} not found")
