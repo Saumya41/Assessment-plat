@@ -68,14 +68,3 @@ async def get_assessment(student_id: str = Query(...), quiz_id: str = Query(...)
         "message": "Assessment data retrieved successfully",
         "quiz": quiz,
     }
-
-@router.post("/student_answer", response_description="Record student's answer")
-async def add_student_answer_data(answer_data: StudentAnswerSchema = Body(...)):
-    student_answer = StudentAnswer(**answer_data.dict())
-    new_answer = await add_student_answer(student_answer)
-    return {
-        "status_code": 200,
-        "response_type": "success",
-        "description": "Student answer recorded successfully",
-        "data": new_answer,
-    }

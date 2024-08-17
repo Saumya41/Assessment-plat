@@ -11,8 +11,8 @@ class UniversalAnswer(Document):
 
 class StudentAnswer(Document):
     quiz_id: PydanticObjectId
+    student_id: PydanticObjectId
     question_id: PydanticObjectId
-    user_id: PydanticObjectId
     student_answer: str
 
     class Settings:

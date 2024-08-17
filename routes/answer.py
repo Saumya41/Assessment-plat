@@ -23,20 +23,6 @@ async def add_universal_answer_data(answer_data: UniversalAnswerSchema = Body(..
         "data": new_answer,
     }
 
-
-# Student Answer Route
-@router.post("/student_answer", response_description="Record student's answer")
-async def add_student_answer_data(answer_data: StudentAnswerSchema = Body(...)):
-    student_answer = StudentAnswer(**answer_data.dict())
-    new_answer = await add_student_answer(student_answer)
-    return {
-        "status_code": 200,
-        "response_type": "success",
-        "description": "Student answer recorded successfully",
-        "data": new_answer,
-    }
-
-
 # Retrieve Universal Answer by Question ID
 @router.get("/universal_answer/{question_id}", response_description="Get the correct answer for a question")
 async def get_universal_answer(question_id: PydanticObjectId):
@@ -51,10 +37,23 @@ async def get_universal_answer(question_id: PydanticObjectId):
     raise HTTPException(status_code=404, detail="Universal answer not found")
 
 
+# Student Answer Route
+@router.post("/student_answer", response_description="Record student's answer")
+async def add_student_answer_data(answer_data: StudentAnswerSchema = Body(...)):
+    student_answer = StudentAnswer(**answer_data.dict())
+    new_answer = await add_student_answer(student_answer)
+    return {
+        "status_code": 200,
+        "response_type": "success",
+        "description": "Student answer recorded successfully",
+        "data": new_answer,
+    }
+
+
 # Retrieve Student Answers by Quiz ID and User ID
 @router.get("/student_answers/{quiz_id}/{user_id}", response_description="Get student's answers for a quiz")
-async def get_student_answers(quiz_id: PydanticObjectId, user_id: PydanticObjectId):
-    answers = await retrieve_student_answers(quiz_id, user_id)
+async def get_student_answers(quiz_id: PydanticObjectId, student_id: PydanticObjectId):
+    answers = await retrieve_student_answers(quiz_id, student_id)
     return {
         "status_code": 200,
         "response_type": "success",

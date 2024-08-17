@@ -20,16 +20,16 @@ class UniversalAnswerSchema(BaseModel):
 
 class StudentAnswerSchema(BaseModel):
     quiz_id: PydanticObjectId
+    Student_id: PydanticObjectId
     question_id: PydanticObjectId
-    user_id: PydanticObjectId
     student_answer: str
 
     class Config:
         json_schema_extra = {
             "example": {
                 "quiz_id": "64d5f87cf00f080014c4a5e4",
+                "student_id": "64d5f87cf00f080014c4a5e6",
                 "question_id": "64d5f87cf00f080014c4a5e5",
-                "user_id": "64d5f87cf00f080014c4a5e6",
                 "student_answer": "Paris",
             }
         }
