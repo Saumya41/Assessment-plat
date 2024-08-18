@@ -6,7 +6,7 @@ from models.question import Question
 from models.answer import UniversalAnswer, StudentAnswer
 from models.quiz import Quiz, StudentScore
 from models.answer import StudentAnswer, UniversalAnswer
-
+import random
 admin_collection = Admin
 student_collection = Student
 question_collection = Question
@@ -168,6 +168,21 @@ async def retrieve_student_score(quiz_id: PydanticObjectId, student_id: Pydantic
     return student_score
 
 
-async def retrieve_questions_by_ids(question_ids: List[PydanticObjectId]):
-    questions = await Question.find({"_id": {"$in": question_ids}}).to_list()
-    return questions
+async def retrieve_random_quiz_by_id(quiz_id: PydanticObjectId):
+    quiz = await Quiz.get(quiz_id)
+    if quiz:
+        # Retrieve all questions associated with this quiz
+        questions = await retrieve_questions_by_ids(quiz.questions)
+        
+        # Shuffle the questions order
+        random.shuffle(questions)
+        
+        # Shuffle the options of each question
+        for question in questions:
+            random.shuffle(question.options)  # Access options using dot notation
+
+        # Embed the shuffled questions in the quiz object
+        quiz_data = quiz.dict()
+        quiz_data["questions"] = [question.dict() for question in questions]  # Convert questions back to dictionaries
+        return quiz_data
+    return None

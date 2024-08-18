@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Body, HTTPException, Query, Depends
 from typing import List
 from beanie import PydanticObjectId
-from database.database import retrieve_questions_by_ids, create_quiz, retrieve_student, retrieve_quiz_by_id
+from database.database import retrieve_questions_by_ids, create_quiz, retrieve_student, retrieve_quiz_by_id, retrieve_random_quiz_by_id
 from schemas.quiz import Response
 from utils.email import send_assessment_email
 from utils.utils import generate_assessment_link
@@ -23,6 +23,18 @@ async def create_quiz_endpoint(question_ids: List[PydanticObjectId] = Body(...),
         "description": "Quiz created successfully",
         "data": quiz,
     }
+@router.get("/shuffle_quiz/{quiz_id}", response_description="Fetch random quiz by ID")
+async def get_random_quiz(quiz_id: PydanticObjectId):
+    quiz = await retrieve_random_quiz_by_id(quiz_id)
+    if quiz:
+        return {
+            "status_code": 200,
+            "response_type": "success",
+            "description": "Quiz retrieved successfully",
+            "data": quiz,  # This will include the shuffled questions and options
+        }
+    else:
+        raise HTTPException(status_code=404, detail=f"Quiz with ID {quiz_id} not found")
 
 @router.get("/quiz/{quiz_id}", response_description="Fetch quiz by ID")
 async def get_quiz(quiz_id: PydanticObjectId):
@@ -32,7 +44,7 @@ async def get_quiz(quiz_id: PydanticObjectId):
             "status_code": 200,
             "response_type": "success",
             "description": "Quiz retrieved successfully",
-            "data": quiz,  # This will include the full questions now
+            "data": quiz,
         }
     else:
         raise HTTPException(status_code=404, detail=f"Quiz with ID {quiz_id} not found")
