@@ -36,7 +36,7 @@ async def get_random_quiz(quiz_id: PydanticObjectId):
     else:
         raise HTTPException(status_code=404, detail=f"Quiz with ID {quiz_id} not found")
 
-@router.get("/quiz/{quiz_id}", response_description="Fetch quiz by ID")
+@router.get("/quiz/{quiz_id}", response_description="Fetch quiz by ID",dependencies=[Depends(JWTBearer())])
 async def get_quiz(quiz_id: PydanticObjectId):
     quiz = await retrieve_quiz_by_id(quiz_id)
     if quiz:
@@ -61,11 +61,11 @@ async def send_assessment_link(student_id: str, quiz_id: str):
     return {"message": "Assessment link sent successfully."}
 
 
-@router.get("/assessments")
+@router.get("/assessments", dependencies=[Depends(JWTBearer())])
 async def get_assessment(student_id: str = Query(...), quiz_id: str = Query(...)):
     # Retrieve the student and quiz based on the provided IDs
     student = await retrieve_student(student_id)
-    quiz = await retrieve_quiz_by_id(PydanticObjectId(quiz_id))
+    quiz = await retrieve_random_quiz_by_id(PydanticObjectId(quiz_id))
 
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
